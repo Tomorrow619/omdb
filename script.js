@@ -12,6 +12,11 @@ const searchBtn = document.getElementById("searchBtn");
 //Слушатели событий
 themeBtn.addEventListener("click", themeChange);
 searchBtn.addEventListener("click", findMovie);
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+        findMovie()
+    }
+})
 //Cмена темы
 function themeChange() {
     const body = document.querySelector("body")
@@ -34,6 +39,7 @@ async function findMovie() {
         movieTittle.innerHTML = `${result.Error}`;
     } else {
         showMovie(result);
+        findSimilarMovies()
         console.log(result);
     }
 }
@@ -60,6 +66,54 @@ function showMovie(movie) {
     }
     );
 }
+
+
+// Функция похожих фильмов 
+async function findSimilarMovies() {
+    const search = document.getElementsByName("search")[0].value;
+    const similarMovieTittle = document.getElementsByClassName("movieTitle")[1];
+    const data = { apikey: "c00ec9e6", s: search };
+    const result = await sendRequest("http://www.omdbapi.com/", "GET", data);
+    console.log(result.Search);
+    showSimilarMovies(result.Search);
+
+    if (result.Response == "False") {
+
+    } else {
+        similarMovieTittle.style.display = "block";
+        similarMovieTittle.innerHTML = `Найдено похожих фильмов: ${result.totalResults}`;
+    }
+
+}
+function showSimilarMovies(movies) {
+    const similarMovies = document.getElementsByClassName("similarMovie")[0];
+    similarMovies.innerHTML = "";
+    similarMovies.style.display = "grid"
+    for (let i = 0; i < movies.length; i++) {
+        const movie = movies[i];
+        if (movie.Poster !== "N/A") {
+            let similarMovie = ` 
+             <div class="similarMovieCards" style="background-image: url('${movie.Poster}');">
+            
+                              <div class="saved" onclick ="addSaved()"
+                                data-imdbID="${movie.imdID}" data-title="${movie.Title}" data-poster="${movie.Poster}">
+            
+                                 </div>
+                             <div class="similarMovieTittle" >
+                             ${movie.Title}
+                             </div>
+            </div>
+            ` 
+            similarMovies.innerHTML+=similarMovie
+        }
+    }
+
+}
+
+
+
+
+
 
 
 
